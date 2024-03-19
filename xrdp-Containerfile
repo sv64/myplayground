@@ -1,0 +1,29 @@
+FROM debian:12
+
+RUN apt-get update && apt-get install -y \
+    xrdp dbus-x11 
+
+RUN apt-get install -y \
+    xfce4 \
+    xfce4-terminal
+
+RUN DEBIAN_FRONTEND=noninteractive \
+    apt-get install -y \
+    locales sudo firefox-esr \
+    fonts-noto-cjk
+
+RUN locale-gen en_US.UTF-8 && locale-gen ko_KR.UTF-8
+
+ENV LANG C.UTF-8
+ENV LC_ALL C.UTF-8
+
+RUN useradd -m user && \
+    echo "user:Passw0rd" | chpasswd && \
+    usermod -aG sudo user
+
+RUN echo "xfce4-session" > /home/user/.xsession && \
+    chown user:user /home/user/.xsession
+
+EXPOSE 3389
+
+CMD ["bash", "-c", "/usr/sbin/xrdp-sesman --nodaemon & /usr/sbin/xrdp --nodaemon & tail -f /dev/null"]
